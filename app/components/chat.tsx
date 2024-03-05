@@ -559,7 +559,7 @@ export function ChatActions(props: {
         <Selector
           defaultSelectedValue={currentModel}
           items={models.map((m) => ({
-            title: m.displayName,
+            title: m.displayName + " 【" + m.provider?.providerName + "】",
             value: m.name,
           }))}
           onClose={() => setShowModelSelector(false)}
@@ -1100,11 +1100,13 @@ function _Chat() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  
+
   const handlePaste = useCallback(
     async (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
       const currentModel = chatStore.currentSession().mask.modelConfig.model;
-      if(!isVisionModel(currentModel)){return;}
+      if (!isVisionModel(currentModel)) {
+        return;
+      }
       const items = (event.clipboardData || window.clipboardData).items;
       for (const item of items) {
         if (item.kind === "file" && item.type.startsWith("image/")) {

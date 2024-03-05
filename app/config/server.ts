@@ -54,18 +54,18 @@ export const getServerSideConfig = () => {
     );
   }
 
-  const disableGPT4 = !!process.env.DISABLE_GPT4;
+  const disableGPT4 = false;
   let customModels = process.env.CUSTOM_MODELS ?? "";
 
-  if (disableGPT4) {
-    if (customModels) customModels += ",";
-    customModels += DEFAULT_MODELS.filter((m) => m.name.startsWith("gpt-4"))
-      .map((m) => "-" + m.name)
-      .join(",");
-  }
+  // if (disableGPT4) {
+  //   if (customModels) customModels += ",";
+  //   customModels += DEFAULT_MODELS.filter((m) => m.name.startsWith("gpt-4"))
+  //     .map((m) => "-" + m.name)
+  //     .join(",");
+  // }
 
-  const isAzure = !!process.env.AZURE_URL;
-  const isGoogle = !!process.env.GOOGLE_API_KEY;
+  const isAzure = false;
+  const isGoogle = false;
 
   const apiKeyEnvVar = process.env.OPENAI_API_KEY ?? "";
   const apiKeys = apiKeyEnvVar.split(",").map((v) => v.trim());

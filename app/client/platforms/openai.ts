@@ -15,6 +15,7 @@ import {
   LLMApi,
   LLMModel,
   LLMUsage,
+  ModelDetails,
   MultimodalContent,
 } from "../api";
 import Locale from "../../locales";
@@ -41,7 +42,7 @@ export interface OpenAIListModelResponse {
 }
 
 export class ChatGPTApi implements LLMApi {
-  private disableListModels = true;
+  private disableListModels = false;
 
   path(path: string): string {
     const accessStore = useAccessStore.getState();
@@ -328,35 +329,68 @@ export class ChatGPTApi implements LLMApi {
     } as LLMUsage;
   }
 
+  // async models(): Promise<LLMModel[]> {
+  //   if (this.disableListModels) {
+  //     return DEFAULT_MODELS.slice();
+  //   }
+  //
+  //   const res = await fetch(this.path(OpenaiPath.ListModelPath), {
+  //     method: "GET",
+  //     headers: {
+  //       ...getHeaders(),
+  //     },
+  //   });
+  //
+  //   const resJson = (await res.json()) as OpenAIListModelResponse;
+  //   const chatModels = resJson.data?.filter((m) => m.id.startsWith("gpt-"));
+  //   console.log("[Models]", chatModels);
+  //
+  //   if (!chatModels) {
+  //     return [];
+  //   }
+  //
+  //   return chatModels.map((m) => ({
+  //     name: m.id,
+  //     available: true,
+  //     provider: {
+  //       id: "openai",
+  //       providerName: "OpenAI",
+  //       providerType: "openai",
+  //     },
+  //   }));
+  // }
+
   async models(): Promise<LLMModel[]> {
     if (this.disableListModels) {
       return DEFAULT_MODELS.slice();
     }
 
-    const res = await fetch(this.path(OpenaiPath.ListModelPath), {
+    const response = await fetch("https://models.wetolink.com/models.json", {
       method: "GET",
       headers: {
         ...getHeaders(),
       },
     });
 
-    const resJson = (await res.json()) as OpenAIListModelResponse;
-    const chatModels = resJson.data?.filter((m) => m.id.startsWith("gpt-"));
+    const modelsJson: { [key: string]: ModelDetails } = await response.json();
+    const modelEntries = Object.entries(modelsJson);
+
+    const chatModels = modelEntries.map(
+      ([name, details]): LLMModel => ({
+        name: name,
+        available: true,
+        provider: {
+          id: details.vendor.toLowerCase().replace(/\s/g, ""),
+          providerName: details.vendor,
+          providerType: "openai", // Keeping providerType as "openai" as per your requirement
+        },
+        description: details.description,
+      }),
+    );
+
     console.log("[Models]", chatModels);
 
-    if (!chatModels) {
-      return [];
-    }
-
-    return chatModels.map((m) => ({
-      name: m.id,
-      available: true,
-      provider: {
-        id: "openai",
-        providerName: "OpenAI",
-        providerType: "openai",
-      },
-    }));
+    return chatModels;
   }
 }
 export { OpenaiPath };
