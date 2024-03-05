@@ -381,7 +381,7 @@ export class ChatGPTApi implements LLMApi {
         available: true,
         provider: {
           id: details.vendor.toLowerCase().replace(/\s/g, ""),
-          providerName: details.vendor,
+          providerName: details.vendor + "-" + details.description,
           providerType: "openai", // Keeping providerType as "openai" as per your requirement
         },
         description: details.description,
